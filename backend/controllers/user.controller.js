@@ -1,6 +1,6 @@
 import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
-import bcryptjs  from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { v2 as cloudinary} from "cloudinary";
 
 
@@ -21,10 +21,13 @@ export const getUserProfile = async (req, res) => {
 };
 
 export const followUnfollowUser = async (req, res) => {
-  
-  
   try {
     const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
     const userToModify = await User.findById(id);
     const currentUser = await User.findById(req.user._id);
     
@@ -43,7 +46,7 @@ export const followUnfollowUser = async (req, res) => {
       await User.findByIdAndUpdate(id, { $pull: { followers: req.user._id } });
       await User.findByIdAndUpdate(req.user._id, { $pull: { following: id } });
 
-      //TODO return the id of the user as a response
+      
       return res.status(200).json({ message: "Unfollowed successfully" });
     } else {
       // Follow the user
@@ -58,7 +61,7 @@ export const followUnfollowUser = async (req, res) => {
       });
       await newNotification.save();
 
-      //TODO return the id of the user as a response
+      
       return res.status(200).json({ message: "Followed successfully" });
     }
   } catch (error) {
