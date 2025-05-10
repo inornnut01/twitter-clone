@@ -21,6 +21,7 @@ const Post = ({ post }) => {
 
 	const handlePostComment = (e) => {
 		e.preventDefault();
+		
 	};
 
 	const handleLikePost = () => {};

@@ -23,12 +23,12 @@ const CreatePost = () => {
 
 	const handleImgChange = (e) => {
 		const file = e.target.files[0];
-		if (file) {
-			const reader = new FileReader();
-			reader.onload = () => {
-				setImg(reader.result);
+		if (file) { 
+			const reader = new FileReader(); // create a new file reader
+			reader.onload = () => { 
+				setImg(reader.result); // set the image to the state
 			};
-			reader.readAsDataURL(file);
+			reader.readAsDataURL(file); // read the file as a data url
 		}
 	};
 
