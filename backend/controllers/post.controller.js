@@ -82,7 +82,17 @@ export const commentOnPost = async (req, res) => {
     post.comments.push(comment);
     await post.save();
 
-    res.status(200).json(post);
+    // Populate user data for the new comment
+    const populatedPost = await Post.findById(postId)
+      .populate({
+        path: 'comments.user',
+        select: 'fullName username profileImg'
+      });
+
+    // Get the last comment (the one we just added)
+    const newComment = populatedPost.comments[populatedPost.comments.length - 1];
+
+    res.status(200).json(newComment);
     
   } catch (error) {
     console.log("Error in commentOnPost controller", error.message);

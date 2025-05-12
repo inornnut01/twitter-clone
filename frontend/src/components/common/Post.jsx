@@ -72,6 +72,49 @@ const Post = ({ post }) => {
 		}
 	});
 	
+	const { mutate: commentPost, isPending: isCommenting} = useMutation({
+		mutationFn: async () => {
+			try {
+				const res = await fetch(`/api/posts/comment/${post._id}`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({text: comment}),
+				});
+				const data = await res.json();
+				if(!res.ok) throw new Error(data.error || "Failed to comment on post");
+				return data;
+			} catch (error) {
+				throw new Error(error);
+			}
+		},
+		onSuccess: (newComment) => {
+			toast.success("Comment added successfully");
+			setComment("");
+			queryClient.setQueryData(["posts"], (oldData) => {
+				return oldData.map((p) => {
+					if(p._id === post._id) {
+						return {
+							...p,
+							comments: [...p.comments, {
+								...newComment,
+								user: {
+									fullName: newComment.user.fullName,
+									username: newComment.user.username,
+									profileImg: newComment.user.profileImg
+								}
+							}]
+						};
+					}
+					return p;
+				});
+			});
+		},
+		onError: (error) => {
+			toast.error(error.message || "Failed to comment on post");
+		}
+	})
 
 	const postOwner = post.user;
 	const isLiked = post.likes.includes(authUser?._id);
@@ -80,15 +123,14 @@ const Post = ({ post }) => {
 
 	const formattedDate = "1h";
 
-	const isCommenting = false;
-
 	const handleDeletePost = () => {
 		deletePost();
 	};
 
 	const handlePostComment = (e) => {
 		e.preventDefault();
-		
+		if(isCommenting) return;
+		commentPost();
 	};
 
 	const handleLikePost = () => {
